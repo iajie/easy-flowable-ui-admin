@@ -1,3 +1,14 @@
 {
-  "extends": "./src/.umi/tsconfig.json"
+  "extends": "./src/.umi/tsconfig.json",
+  "compileOnSave": true,
+  "compilerOptions": {
+    "module": "CommonJS",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+  },
+  "paths": {
+    "@/*": ["./src/*"],
+    "@@/": ["./src/.umi/*"]
+  },
+  "exclude": ["node_modules", "logs"]
 }
