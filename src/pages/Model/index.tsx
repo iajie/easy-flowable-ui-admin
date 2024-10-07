@@ -1,6 +1,6 @@
 import { DeleteOutlined, EditOutlined, FileAddTwoTone } from "@ant-design/icons"
 import { ActionType, ModalForm, PageContainer, ProFormSelect, ProFormText, ProFormTextArea, ProList } from "@ant-design/pro-components"
-import { Alert, Button, Space, Image, Popover, Flex, Tag, Popconfirm, message, Drawer, Modal } from "antd"
+import { Alert, Button, Space, Image, Popover, Tag, Popconfirm, message, Modal } from "antd"
 import React from "react"
 import { loadTableData, typeOptions } from "./props"
 import { save, deleteById } from "./props/service";
@@ -58,10 +58,12 @@ export default () => {
                     render: (dom, record) => {
                         return <Space direction="vertical">
                             <Image width='100%' height="120px" preview={false} src={record.thumbnail || defaultImg} />
-                            <Space direction="vertical">
-                                <span>流程标识: {record.key}</span>
-                                <span>最后更新时间：{record.updateTime}</span>
-                            </Space>
+                            <Popover title={record.remarks && '描述'} content={record.remarks && record.remarks}>
+                                <Space direction="vertical">
+                                    <span>流程标识: {record.key}</span>
+                                    <span>最后更新时间：{record.updateTime}</span>
+                                </Space>
+                            </Popover>
                         </Space>
                     }
                 },

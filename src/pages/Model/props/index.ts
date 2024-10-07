@@ -9,6 +9,7 @@ export const loadTableData = async (params: any) => {
     const page = { current: params.current || 1, size: params.pageSize || 10 };
     const queryParams: any = {
         name: params.name,
+        modelType: params.modelType,
         key: params.key,
     };
     const { success, result } = await pageQuery({ ...page, params: queryParams });
