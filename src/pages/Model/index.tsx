@@ -140,7 +140,7 @@ export default () => {
                 }}
                 panel={{
                     users,
-                    groups
+                    groups,
                 }}
                 data={state.dataInfo.modelEditorXml}
                 flowKey={state.dataInfo.key}
