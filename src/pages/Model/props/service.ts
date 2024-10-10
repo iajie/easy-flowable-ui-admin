@@ -32,3 +32,12 @@ export const save = async (params: any) => {
 export const deleteById = async (id: string) => {
     return request(`/easy-flowable/model/remove/${id}`);
 }
+
+/**
+ * 根据模型ID部署
+ * @param id 模型ID
+ * @returns
+ */
+export const deploymentModel = async (id: string) => {
+    return request(`/easy-flowable/deployment/${id}`);
+}

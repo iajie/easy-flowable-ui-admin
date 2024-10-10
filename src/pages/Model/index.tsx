@@ -1,17 +1,19 @@
-import { DeleteOutlined, EditOutlined, FileAddTwoTone } from "@ant-design/icons"
+import { DeleteOutlined, DeploymentUnitOutlined, EditOutlined, FileAddTwoTone } from "@ant-design/icons";
 import { ActionType, ModalForm, PageContainer, ProFormSelect, ProFormText, ProFormTextArea, ProList } from "@ant-design/pro-components"
 import { Alert, Button, Space, Image, Popover, Tag, Popconfirm, message, Modal } from "antd"
 import React from "react"
+import { useModel } from '@umijs/max';
 import { loadTableData, typeOptions } from "./props"
-import { save, deleteById } from "./props/service";
+import { save, deleteById, deploymentModel } from "./props/service";
 import defaultImg from '@/assets/default.png';
 import './index.less';
 import { EasyFlowable } from "easy-flowable-react"
 
 export default () => {
 
+    const { initialState } = useModel('@@initialState');
+    const { users, groups } = initialState;
     const list = React.useRef<ActionType>();
-
     const [state, setState] = React.useState<{ dataInfo: any; open: boolean; title: string; }>({
         open: false,
         title: '',
@@ -71,6 +73,17 @@ export default () => {
                     search: false,
                     render: (dom, record) => {
                         return <Space>
+                            <Popconfirm title="提示" description="是否部署该模型？部署后启动的流程将以最新版本为主！" onConfirm={async () => {
+                                const res = await deploymentModel(record.id);
+                                if (res.success) {
+                                    message.success('部署成功！');
+                                    reloadTable();
+                                } else {
+                                    message.error(res.message);
+                                }
+                            }}>
+                                <Button icon={<DeploymentUnitOutlined />} />
+                            </Popconfirm>
                             <Popover content="可视化编辑器">
                                 <Button icon={<EditOutlined />} onClick={() => {
                                     setState({ dataInfo: record, open: true, title: record.name })
@@ -124,6 +137,10 @@ export default () => {
                             reloadTable();
                         }
                     }
+                }}
+                panel={{
+                    users,
+                    groups
                 }}
                 data={state.dataInfo.modelEditorXml}
                 flowKey={state.dataInfo.key}
