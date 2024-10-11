@@ -2,7 +2,7 @@ import { DeleteOutlined, DeploymentUnitOutlined, EditOutlined, FileAddTwoTone } 
 import { ActionType, ModalForm, PageContainer, ProFormSelect, ProFormText, ProFormTextArea, ProList } from "@ant-design/pro-components"
 import { Alert, Button, Space, Image, Popover, Tag, Popconfirm, message, Modal } from "antd"
 import React from "react"
-import { useModel } from '@umijs/max';
+import { useModel, history } from '@umijs/max';
 import { loadTableData, typeOptions } from "./props"
 import { save, deleteById, deploymentModel } from "./props/service";
 import defaultImg from '@/assets/default.png';
@@ -28,6 +28,9 @@ export default () => {
 
     return <PageContainer title="流程模型">
         <ProList ghost
+                 itemCardProps={{
+                     ghost: true,
+                 }}
             grid={{ gutter: 16, column: 4 }}
             request={loadTableData}
             actionRef={list}
@@ -48,7 +51,10 @@ export default () => {
                     title: '流程类型'
                 },
                 avatar: {
-                    render: (dom, record) => <Tag>V{record.publishVersion || 1}</Tag>,
+                    render: (dom, record) => <Tag
+                        color={record.publishVersion > 0 ? 'success' : 'blue'}>
+                        {record.publishVersion > 0 ? `V${record.publishVersion}` : '暂未部署'}
+                    </Tag>,
                     search: false,
                 },
                 type: {
@@ -59,7 +65,7 @@ export default () => {
                     search: false,
                     render: (dom, record) => {
                         return <Space direction="vertical">
-                            <Image width='100%' height="120px" preview={false} src={record.thumbnail || defaultImg} />
+                            <Image width='100%' height="100px" preview={false} src={record.thumbnail || defaultImg} />
                             <Popover title={record.remarks && '描述'} content={record.remarks && record.remarks}>
                                 <Space direction="vertical">
                                     <span>流程标识: {record.key}</span>
@@ -71,37 +77,40 @@ export default () => {
                 },
                 actions: {
                     search: false,
-                    render: (dom, record) => {
-                        return <Space>
-                            <Popconfirm title="提示" description="是否部署该模型？部署后启动的流程将以最新版本为主！" onConfirm={async () => {
-                                const res = await deploymentModel(record.id);
-                                if (res.success) {
-                                    message.success('部署成功！');
-                                    reloadTable();
-                                } else {
-                                    message.error(res.message);
-                                }
-                            }}>
-                                <Button icon={<DeploymentUnitOutlined />} />
-                            </Popconfirm>
-                            <Popover content="可视化编辑器">
-                                <Button icon={<EditOutlined />} onClick={() => {
-                                    setState({ dataInfo: record, open: true, title: record.name })
-                                }} />
-                            </Popover>
-                            <Popconfirm title="提示" description="是否确认删除该模型？" onConfirm={async () => {
-                                const res = await deleteById(record.id);
-                                if (res.success) {
-                                    message.success('删除成功！');
-                                    reloadTable();
-                                } else {
-                                    message.error(res.message);
-                                }
-                            }}>
-                                <Button danger icon={<DeleteOutlined />} />
-                            </Popconfirm>
-                        </Space>
-                    },
+                    cardActionProps: 'actions',
+                    render: (dom, record) => [
+                        <Popconfirm title="提示" description="是否部署该模型？部署后启动的流程将以最新版本为主！" onConfirm={async () => {
+                            const res = await deploymentModel(record.id);
+                            if (res.success) {
+                                message.success('部署成功！');
+                                reloadTable();
+                            } else {
+                                message.error(res.message);
+                            }
+                        }}>
+                            <Button type='link' key={'deployment_' + record.id} icon={<DeploymentUnitOutlined />}>部署</Button>
+                        </Popconfirm>,
+                        <Button type='link' key={'history_' + record.id} onClick={() => {
+                            const { id, name, modelEditorXml } = record;
+                            history.push('/modelHistory', { modelId: id, title: name, xml: modelEditorXml });
+                        }}>历史版本</Button>,
+                        <Popover content="可视化编辑器">
+                            <Button type='link' key={'edit_' + record.id} icon={<EditOutlined />} onClick={() => {
+                                setState({ dataInfo: record, open: true, title: record.name })
+                            }}>编辑</Button>
+                        </Popover>,
+                        <Popconfirm title="提示" description="是否确认删除该模型？" onConfirm={async () => {
+                            const res = await deleteById(record.id);
+                            if (res.success) {
+                                message.success('删除成功！');
+                                reloadTable();
+                            } else {
+                                message.error(res.message);
+                            }
+                        }}>
+                            <Button type='link' danger key={'delete_' + record.id} icon={<DeleteOutlined />}>删除</Button>
+                        </Popconfirm>
+                    ],
                 },
             }}
             headerTitle={<ModalForm title="创建一个新的业务流程模型" width="30%" onFinish={async (params) => {
