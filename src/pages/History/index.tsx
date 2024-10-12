@@ -1,10 +1,9 @@
 import React from "react";
 import { useLocation } from '@umijs/max';
 import { ActionType, ProTable, ProColumns } from "@ant-design/pro-components";
+import { rollback } from './props/service';
 import { columns, loadTableData } from "./props";
 import { Button, message, Popconfirm } from "antd";
-import { deleteById } from "@/pages/Model/props/service";
-import { DeleteOutlined } from "@ant-design/icons";
 
 export default () => {
 
@@ -17,7 +16,14 @@ export default () => {
 		render: (dom, entity) => [
 			<Button key={"view_" + entity.id}  type="link">查看</Button>,
 			<Button key={"compare_" + entity.id} type="link">比较</Button>,
-			<Popconfirm title="提示" key={"rollback_" + entity.id} description="是否回滚该版本？" onConfirm={async () => { }}>
+			<Popconfirm title="提示" key={"rollback_" + entity.id} description="是否回滚该版本？" onConfirm={async () => {
+				const res = await rollback(entity.id);
+				if (res.result === true) {
+					message.success('回滚成功');
+				} else {
+					message.error(res.message);
+				}
+			}}>
 				<Button type="link">回滚</Button>
 			</Popconfirm>
 		]

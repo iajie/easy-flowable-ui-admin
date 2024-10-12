@@ -6,3 +6,7 @@ export async function pageQuery(params: any) {
 		data: params
 	})
 }
+
+export async function rollback(historyId: string) {
+	return request(`/easy-flowable/model/rollback/${historyId}`)
+}

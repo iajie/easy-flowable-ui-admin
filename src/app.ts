@@ -5,8 +5,8 @@
  */
 import logo from './assets/logo.png';
 import avatar from './assets/logo-full.png';
-import { Button, Dropdown, Modal, notification, Space } from 'antd';
-import { history, RequestConfig } from '@umijs/max';
+import { Button, Dropdown, Modal, notification } from 'antd';
+import { history, RequestConfig, RunTimeLayoutConfig } from '@umijs/max';
 import { isLogin, users, groups } from './utils/easy-flowable.service';
 import React from "react";
 import { LogoutOutlined } from "@ant-design/icons";
@@ -19,7 +19,7 @@ interface InitialStateProps {
 	/**
 	 * @description 用户名称
 	 */
-	username?: string;
+	username?: string | null;
 	/**
 	 * @description 候选组
 	 */
@@ -45,8 +45,7 @@ export async function getInitialState(): Promise<InitialStateProps> {
 	return initData;
 }
 
-export const layout: any = ({ initialState }) => {
-	const { username } = initialState;
+export const layout: RunTimeLayoutConfig = ({ initialState }) => {
 	return {
 		logo,
 		title: 'Easy-Flowable',
@@ -71,7 +70,7 @@ export const layout: any = ({ initialState }) => {
 		avatarProps: {
 			src: avatar,
 			size: 'large',
-			title: username,
+			title: initialState?.username,
 			render: (props, dom) => React.createElement(Dropdown, {
 				menu: {
 					items: [
@@ -104,7 +103,7 @@ export const layout: any = ({ initialState }) => {
 
 export const request: RequestConfig = {
 	responseInterceptors: [((response) => {
-		const { data, status } = response;
+		const { data, status }: any = response;
 		if (data.success && status == 200) {
 			return response;
 		} else {
@@ -116,7 +115,7 @@ export const request: RequestConfig = {
 		return response;
 	})],
 	errorConfig: {
-		errorHandler: ({ response }) => {
+		errorHandler: ({ response }: any) => {
 			if (response.status === 401) {
 				history.push('/login');
 			}

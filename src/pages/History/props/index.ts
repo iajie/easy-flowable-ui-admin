@@ -16,6 +16,9 @@ export const columns: ProColumns[] = [
  * @param params
  */
 export const loadTableData = async (params: any) => {
+	if (!params.modelId) {
+		return { success: false, data: [] };
+	}
 	const page = { current: params.current || 1, size: params.pageSize || 10 };
 	const queryParams: any = {
 		modelId: params.modelId,
