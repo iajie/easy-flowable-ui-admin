@@ -27,11 +27,7 @@ export default () => {
 
 
     return <PageContainer title="流程模型">
-        <ProList ghost
-                 itemCardProps={{
-                     ghost: true,
-                 }}
-            grid={{ gutter: 16, column: 4 }}
+        <ProList ghost itemCardProps={{ ghost: true }} grid={{ gutter: 16, column: 4 }}
             request={loadTableData}
             actionRef={list}
             style={{ padding: 0 }}
@@ -64,12 +60,13 @@ export default () => {
                 content: {
                     search: false,
                     render: (dom, record) => {
-                        return <Space direction="vertical">
-                            <Image width='100%' height="100px" preview={false} src={record.thumbnail || defaultImg} />
+                        return <Space>
+                            <Image width='190px' height="100px" preview={false} src={record.thumbnail || defaultImg} />
                             <Popover title={record.remarks && '描述'} content={record.remarks && record.remarks}>
                                 <Space direction="vertical">
                                     <span>流程标识: {record.key}</span>
-                                    <span>最后更新时间：{record.updateTime}</span>
+                                    <span>更新时间：</span>
+                                    <span>{record.updateTime}</span>
                                 </Space>
                             </Popover>
                         </Space>
@@ -139,8 +136,8 @@ export default () => {
                 height={89}
                 toolbar={{
                     isBase64: true,
-                    save: async (xml, base64) => {
-                        const { success, result } = await save({ ...state.dataInfo, modelEditorXml: xml, thumbnail: base64 });
+                    save: async ({xml, base64, name, description}) => {
+                        const { success, result } = await save({ ...state.dataInfo, modelEditorXml: xml, thumbnail: base64, remarks: description, name });
                         if (success) {
                             setState({ ...state, open: false });
                             reloadTable();
