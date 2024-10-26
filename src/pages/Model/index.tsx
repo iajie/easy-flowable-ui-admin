@@ -136,12 +136,14 @@ export default () => {
                 height={89}
                 toolbar={{
                     isBase64: true,
-                    save: async ({xml, base64, name, description}) => {
-                        const { success, result } = await save({ ...state.dataInfo, modelEditorXml: xml, thumbnail: base64, remarks: description, name });
-                        if (success) {
-                            setState({ ...state, open: false });
-                            reloadTable();
-                        }
+                    save: async (data) => {
+                        setTimeout(async () => {
+                            const { success, result } = await save({ ...state.dataInfo, modelEditorXml: data.xml, thumbnail: data.base64, remarks: data.description, name: data.name });
+                            if (success) {
+                                setState({ ...state, open: false });
+                                reloadTable();
+                            }
+                        }, 1000);
                     }
                 }}
                 panel={{

@@ -27,7 +27,7 @@ export default defineConfig({
 		{ name: '首页', path: '/home', component: './Home', },
 		{ name: '流程模型', path: '/model', icon: '', component: './Model', },
 		{ name: '流程部署历史', path: '/modelHistory', icon: '', component: './History', },
-		{ name: '流程管理', path: '/flow', component: './Flow', },
+		{ name: '流程定义', path: '/flow', component: './Flow', },
 		{ name: '登录', path: '/login', layout: false, component: './Login', },
 	],
 	npmClient: 'npm',
