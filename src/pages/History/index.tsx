@@ -1,5 +1,5 @@
 import React from "react";
-import { useLocation } from '@umijs/max';
+import { useLocation, useModel } from '@umijs/max';
 import { ActionType, ProTable, ProColumns } from "@ant-design/pro-components";
 import { rollback } from './props/service';
 import { columns, loadTableData } from "./props";
@@ -8,6 +8,8 @@ import {EasyFlowable} from "easy-flowable-react";
 
 export default () => {
 
+	const { initialState } = useModel('@@initialState');
+	const { users, groups } = initialState;
 	const { state }: any = useLocation();
 	const table = React.useRef<ActionType>();
 
@@ -19,10 +21,9 @@ export default () => {
 				Modal.info({
 					title: false, closable: false, centered: true, icon: null,
 					width: '100%', keyboard: true, mask: false, footer: false,
-					content: <EasyFlowable height={89} data={entity.modelEditorXml}/>
+					content: <EasyFlowable height={89} data={entity.modelEditorXml} panel={{ users, groups }}/>
 				});
 			}} type="link">查看</Button>,
-			// <Button key={"compare_" + entity.id} type="link">比较</Button>,
 			<Popconfirm title="提示" key={"rollback_" + entity.id} description="是否回滚该版本？" onConfirm={async () => {
 				const res = await rollback(entity.id);
 				if (res.result === true) {

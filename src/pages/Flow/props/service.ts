@@ -13,12 +13,12 @@ export const pageQuery = async (params: any) => {
 }
 
 /**
- * 新增/修改
+ * 启动流程
  * @param params
  * @returns
  */
-export const save = async (params: any) => {
-    return request(`/easy-flowable/model/save`, {
+export const startFlow = async (params: any) => {
+    return request(`/easy-flowable/processInstance/start`, {
         method: 'POST',
         data: params
     });

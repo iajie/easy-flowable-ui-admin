@@ -42,7 +42,6 @@ export default () => {
                 subTitle: {
                     valueType: 'select',
                     dataIndex: 'modelType',
-                    // @ts-ignore
                     request: async () => typeOptions,
                     title: '流程类型'
                 },
