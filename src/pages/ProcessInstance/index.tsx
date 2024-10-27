@@ -119,6 +119,7 @@ export default () => {
             params={{ processDefinitionId: state?.processDefinitionId }}
             request={loadTableData}
             search={false}
+            scroll={{ y: 670 }}
             columns={columns.concat(actionColumns)}
             pagination={false}
             rowKey="processInstanceId"

@@ -119,6 +119,8 @@ export default () => {
         <ProTable
             actionRef={table}
             request={loadTableData}
+            scroll={{ y: 670 }}
+            rowKey="processDefinitionId"
             columns={ columns.concat(actionColumn) }/>
         <Drawer open={userTask.open} onClose={() => setUserTask({ ...userTask, open: false })} title="用户任务列表">
             <ProList

@@ -42,6 +42,7 @@ export default () => {
 		params={{ modelId: state?.modelId }}
 		request={loadTableData}
 		search={false}
+		scroll={{ y: 700 }}
 		columns={columns.concat(actionColumns)}
 		pagination={{}}
 		rowKey="id"
