@@ -42,3 +42,5 @@ export const backUserTasks = async (processInstanceId: string) => {
 export const executionHistory = async (processInstanceId: string) => {
     return request(`/easy-flowable/processInstance/executionHistory/${processInstanceId}`)
 }
+
+export const getAttachment = (attachmentId) => `easy-flowable/task/getAttachment/${attachmentId}`;

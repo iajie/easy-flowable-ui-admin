@@ -10,12 +10,13 @@ import {
     ProFormText,
     DrawerForm,
     ProList,
-    ProDescriptions
+    ProDescriptions, ProFormTextArea
 } from "@ant-design/pro-components";
 import { columns, loadTableData, loadListData } from "./props";
-import { stateSet, businessStatus } from "./props/service";
-import { Button, message, Space, Tag } from "antd";
+import { stateSet, businessStatus, getAttachment } from "./props/service";
+import { Button, message, Space, Tag, List, Descriptions } from "antd";
 import { useModel } from "@umijs/max";
+import { actionType } from "@/utils/format";
 
 export default () => {
 
@@ -57,7 +58,9 @@ export default () => {
                     resetButtonProps: false,
                     searchConfig: { submitText: '执行' },
                     render: (props, dom) => <Space>
-                        {dom}
+                        <ModalForm title="流程审批" trigger={<Button type="primary">执行</Button>}>
+                            <ProFormTextArea name="" label="审批意见"/>
+                        </ModalForm>
                         <Button type="primary" danger>流程作废</Button>
                     </Space>
                 }}
@@ -96,17 +99,43 @@ export default () => {
                         },
                         content: {
                             render: (dom, entity) => <ProDescriptions column={3}>
-                                {entity.comment && <>
-                                    <ProDescriptions.Item label="流程执行类型">
-                                        <Tag color="purple">{entity.comment.executeTypeValue}</Tag>
-                                    </ProDescriptions.Item>
-                                    <ProDescriptions.Item label="审批意见" ellipsis>{entity.comment.commentContent}</ProDescriptions.Item>
-                                </>}
                                 <ProDescriptions.Item label="任务节点">{entity.taskDefKey}</ProDescriptions.Item>
                                 <ProDescriptions.Item label="开始时间">{entity.startTime}</ProDescriptions.Item>
                                 <ProDescriptions.Item label="结束时间">{entity.endTime}</ProDescriptions.Item>
                             </ProDescriptions>
                         },
+                        actions: {
+                            render: (dom, { comments, taskName }) => <Space>
+                                {(comments && comments.length)&&
+                                <ModalForm
+                                    submitter={{ render: false }}
+                                    title={`${taskName}-审批意见`}
+                                    trigger={<Button type="text" style={{ color: '#ff7a45' }}>审批意见</Button>}>
+                                    <List
+                                        dataSource={comments}
+                                         renderItem={(item) => {
+                                             const action = actionType.find(i => i.value == item.flowCommentType);
+                                             let commentContent = item.commentContent, filename;
+                                             if (item.attachmentId) {
+                                                 filename = commentContent.filename;
+                                                 commentContent = commentContent.message;
+                                             }
+                                             return <List.Item>
+                                                 <Descriptions bordered style={{ width: '100%' }} column={2}>
+                                                     <Descriptions.Item label="操作类型">
+                                                         <Tag color={action.color}>{action.label}</Tag>
+                                                     </Descriptions.Item>
+                                                     <Descriptions.Item label="操作人">{item.assigneeName}</Descriptions.Item>
+                                                     <Descriptions.Item span={2} label="意见">{commentContent}</Descriptions.Item>
+                                                     {filename && <Descriptions.Item span={2} label="附件">
+                                                         <a href={getAttachment(item.attachmentId)}>{filename}</a>
+                                                     </Descriptions.Item>}
+                                                 </Descriptions>
+                                             </List.Item>
+                                         }} />
+                                </ModalForm>}
+                            </Space>
+                        }
                     }}
                     request={loadListData}/>
             </DrawerForm>

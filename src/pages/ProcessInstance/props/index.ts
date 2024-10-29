@@ -30,7 +30,6 @@ export const loadListData = async (params: any) => {
     };
 }
 
-
 export const columns: ProColumns[] = [
     { valueType: 'index', title: '序号', width: 60 },
     { dataIndex: 'name', title: '实例名称', ellipsis: true, },

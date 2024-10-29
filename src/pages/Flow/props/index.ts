@@ -52,17 +52,4 @@ export const columns: ProColumns[] = [
             return React.createElement(Tag, {}, '未定义');
         }
     },
-    {
-        dataIndex: 'hasStartFormKey',
-        title: '是否表单流程',
-        search: false,
-        render: (dom) => {
-            if (dom == 1) {
-                return React.createElement(Tag, { color: 'success' }, '是');
-            } else if (dom == 0) {
-                return React.createElement(Tag, { color: 'error' }, '否');
-            }
-            return React.createElement(Tag, {}, '未定义');
-        }
-    },
 ];
