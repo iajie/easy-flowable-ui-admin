@@ -44,3 +44,24 @@ export const executionHistory = async (processInstanceId: string) => {
 }
 
 export const getAttachment = (attachmentId) => `easy-flowable/task/getAttachment/${attachmentId}`;
+
+export const addAttachment = (taskId: string, processInstanceId: string) => `easy-flowable/task/addAttachment?taskId=${taskId}&processInstanceId=${processInstanceId}`;
+
+/**
+ * 获取实例执行历史
+ * @param attachmentId 附件ID
+ */
+export const delAttachment = async (attachmentId: string) => {
+    return request(`/easy-flowable/task/delAttachment/${attachmentId}`)
+}
+
+/**
+ * 获取实例执行历史
+ * @param params 执行信息
+ */
+export const executeTask = async (params: any) => {
+    return request(`/easy-flowable/task/execute`, {
+        method: 'POST',
+        data: params
+    });
+}

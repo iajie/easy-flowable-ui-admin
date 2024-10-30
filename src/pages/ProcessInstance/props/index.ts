@@ -2,6 +2,7 @@ import { list, executionHistory } from "./service";
 import { ProColumns } from "@ant-design/pro-table";
 import React from "react";
 import { Tag } from "antd";
+import { users } from "@/utils/easy-flowable.service";
 
 /**
  * 查询表格数据
@@ -30,15 +31,23 @@ export const loadListData = async (params: any) => {
     };
 }
 
-export const columns: ProColumns[] = [
+export const columns = (users: any[]): ProColumns[] => [
     { valueType: 'index', title: '序号', width: 60 },
-    { dataIndex: 'name', title: '实例名称', ellipsis: true, },
+    { dataIndex: 'name', title: '实例名称', width: 160, ellipsis: true, },
     {
         dataIndex: 'businessKey',
         align: 'center',
         title: '业务主键',
         width: 140,
         ellipsis: true,
+    },
+    {
+        dataIndex: 'startUserId',
+        align: 'center',
+        title: '发起人',
+        width: 120,
+        valueType: 'select',
+        request: () => users
     },
     {
         dataIndex: 'processInstanceVersion',

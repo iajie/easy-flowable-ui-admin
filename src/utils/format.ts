@@ -1,19 +1,3 @@
-/**
- * 操作枚举
- */
-export enum FLOW_ACTION {
-  AGREE = 'AGREE',
-  REBUT = 'REBUT',
-  REVOCATION = 'REVOCATION',
-  REJECT = 'REJECT',
-  REJECT_TO_TASK = 'REJECT_TO_TASK',
-  DELEGATE = 'DELEGATE',
-  ASSIGN = 'ASSIGN',
-  CANCELLATION = 'CANCELLATION',
-  ADD_COMMENT = 'ADD_COMMENT',
-  DEL_COMMENT = 'DEL_COMMENT',
-}
-
 export const actionType = [
   { label: '启动流程', value: '0', color: 'lime' },
   { label: '同意', value: '1', color: 'green' },
@@ -28,4 +12,15 @@ export const actionType = [
   { label: '后加签', value: '10', color: 'blue' },
   { label: '作废', value: '11', color: 'red' },
   { label: '评论', value: '12', color: 'geekblue' },
+];
+
+export const actionOptions = [
+  { label: '审批', value: 'AGREE' },
+  { label: '评论', value: 'ADD_COMMENT' },
+  { label: '驳回', value: 'REJECT' },
+  { label: '驳回到指定节点', value: 'REJECT_TO_TASK' },
+  { label: '委派', value: 'DELEGATE' },
+  { label: '转办', value: 'ASSIGN' },
+  // { label: '前加签', value: 'BEFORE_SIGN' },
+  // { label: '后加签', value: 'AFTER_SIGN' },
 ];

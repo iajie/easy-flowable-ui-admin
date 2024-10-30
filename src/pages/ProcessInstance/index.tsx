@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import './index.less';
 import { useLocation } from '@umijs/max';
 import {
@@ -10,17 +10,27 @@ import {
     ProFormText,
     DrawerForm,
     ProList,
-    ProDescriptions, ProFormTextArea
+    ProFormInstance,
+    ProDescriptions,
+    ProFormTextArea,
+    ProFormRadio,
+    ProFormDependency,
+    ProFormUploadButton,
+    ProFormSelect,
+    ProField,
+    ProFormItem
 } from "@ant-design/pro-components";
 import { columns, loadTableData, loadListData } from "./props";
-import { stateSet, businessStatus, getAttachment } from "./props/service";
-import { Button, message, Space, Tag, List, Descriptions } from "antd";
+import { stateSet, businessStatus, getAttachment, addAttachment, delAttachment, executeTask } from "./props/service";
+import { Button, message, Space, Tag, List, Descriptions, Divider } from "antd";
 import { useModel } from "@umijs/max";
-import { actionType } from "@/utils/format";
+import { actionOptions, actionType } from "@/utils/format";
 
 export default () => {
 
     const { initialState } = useModel('@@initialState');
+    const actionFormRef = useRef<ProFormInstance>();
+    const listRef = useRef<ActionType>();
     const { users } = initialState;
     const { state }: any = useLocation();
     const table = React.useRef<ActionType>();
@@ -58,14 +68,80 @@ export default () => {
                     resetButtonProps: false,
                     searchConfig: { submitText: '执行' },
                     render: (props, dom) => <Space>
-                        <ModalForm title="流程审批" trigger={<Button type="primary">执行</Button>}>
-                            <ProFormTextArea name="" label="审批意见"/>
+                        <ModalForm
+                            modalProps={{
+                                mask: false,
+                                maskClosable: false,
+                                destroyOnClose: true,
+                                onCancel: async () => {
+                                    const attachmentId = actionFormRef.current?.getFieldValue('attachmentId');
+                                    if (attachmentId) {
+                                        await delAttachment(attachmentId[0].response.result);
+                                    }
+                                }
+                            }}
+                            formRef={actionFormRef}
+                            title="流程审批"
+                            layout="horizontal"
+                            labelCol={{ span: 3 }}
+                            trigger={<Button type="primary">执行</Button>}
+                            request={() => ({ flowCommentType: 'AGREE' })}
+                            onFinish={async (values) => {
+                                let attachmentId, commentContent = values.commentContent;
+                                if (values.attachmentId) {
+                                    const file = values.attachmentId[0];
+                                    commentContent = JSON.stringify({
+                                        message: values.commentContent,
+                                        filename: file.name
+                                    });
+                                    attachmentId = file.response.result;
+                                }
+                                const { success } = await executeTask({
+                                    ...values, commentContent, attachmentId,
+                                    processInstanceId: entity.processInstanceId,
+                                    taskId: entity.taskId
+                                });
+                                if (success) {
+                                    message.success('执行成功！');
+                                    listRef.current?.reloadAndRest();
+                                }
+                                return success;
+                            }}>
+                            <ProFormRadio.Group name="flowCommentType" label="操作" options={actionOptions} rules={[{ required: true, message: '执行操作不能为空' }]}/>
+                            <ProFormDependency name={['flowCommentType']}>
+                                {({flowCommentType}) => {
+                                    if (flowCommentType == 'REJECT_TO_TASK') {
+                                        return <ProFormItem name="rejectToTaskId" label="节点" rules={[{ required: true, message: '驳回节点不能为空' }]}>
+                                            <ProTable
+                                                search={false}
+                                                options={false}
+                                                pagination={false}
+                                                columns={[ {valueType: 'radio', title: '节点'} ]}/>
+                                        </ProFormItem>
+                                    } else if (flowCommentType == 'DELEGATE' || flowCommentType == 'ASSIGN') {
+                                        return <ProFormSelect name="userId" rules={[{ required: true, message: '执行人不能为空' }]} label="执行人" request={() => users}/>
+                                    }
+                                }}
+                            </ProFormDependency>
+                            <ProFormTextArea label="审批意见" rules={[{ required: true, message: '审批意见不能为空' }]} name="commentContent"/>
+                            <ProFormUploadButton
+                                name="attachmentId"
+                                fieldProps={{
+                                    onRemove: async (file) => {
+                                        const { success } = await delAttachment(file.response.result);
+                                        return success;
+                                    }
+                                }}
+                                label="附件" max={1}
+                                action={addAttachment(entity.taskId, entity.processInstanceId)} />
                         </ModalForm>
                         <Button type="primary" danger>流程作废</Button>
                     </Space>
                 }}
                 trigger={<Button type='text' style={{ color: 'purple' }}>执行历史</Button>}>
-                <ProList grid={{ column: 1 }}
+                <ProList
+                    grid={{ column: 1 }}
+                    actionRef={listRef}
                     params={{ processInstanceId: entity.processInstanceId }}
                     metas={{
                         avatar: {
@@ -93,9 +169,7 @@ export default () => {
                             dataIndex: 'assignee',
                             valueType: 'select',
                             request: () => users,
-                            render: (dom, entity, index) => <Tag color={index > 0 ? 'geekblue' : 'cyan'}>
-                                {index > 0 ? '执行人' : '发起人'}：{dom}
-                            </Tag>
+                            render: (dom) => <Tag color="geekblue">执行人：{dom}</Tag>
                         },
                         content: {
                             render: (dom, entity) => <ProDescriptions column={3}>
@@ -111,28 +185,38 @@ export default () => {
                                     submitter={{ render: false }}
                                     title={`${taskName}-审批意见`}
                                     trigger={<Button type="text" style={{ color: '#ff7a45' }}>审批意见</Button>}>
-                                    <List
-                                        dataSource={comments}
-                                         renderItem={(item) => {
-                                             const action = actionType.find(i => i.value == item.flowCommentType);
-                                             let commentContent = item.commentContent, filename;
-                                             if (item.attachmentId) {
-                                                 filename = commentContent.filename;
-                                                 commentContent = commentContent.message;
-                                             }
-                                             return <List.Item>
-                                                 <Descriptions bordered style={{ width: '100%' }} column={2}>
-                                                     <Descriptions.Item label="操作类型">
-                                                         <Tag color={action.color}>{action.label}</Tag>
-                                                     </Descriptions.Item>
-                                                     <Descriptions.Item label="操作人">{item.assigneeName}</Descriptions.Item>
-                                                     <Descriptions.Item span={2} label="意见">{commentContent}</Descriptions.Item>
-                                                     {filename && <Descriptions.Item span={2} label="附件">
-                                                         <a href={getAttachment(item.attachmentId)}>{filename}</a>
-                                                     </Descriptions.Item>}
-                                                 </Descriptions>
-                                             </List.Item>
-                                         }} />
+                                    <div style={{ maxHeight: '600px', overflow: 'auto', scrollbarWidth: 'thin' }}>
+                                        <Descriptions bordered size="small" style={{ width: '100%' }} column={2}>
+                                            {
+                                                comments.map(item => {
+                                                    const action = actionType.find(i => i.value == item.flowCommentType);
+                                                    let commentContent = item.commentContent, filename;
+                                                    if (item.attachmentId) {
+                                                        const content = JSON.parse(commentContent);
+                                                        filename = content.filename;
+                                                        commentContent = content.message;
+                                                    }
+                                                    return <>
+                                                        <Descriptions.Item label="操作类型">
+                                                            <Tag color={action.color}>{action.label}</Tag>
+                                                        </Descriptions.Item>
+                                                        <Descriptions.Item label="操作人">{item.assigneeName}</Descriptions.Item>
+                                                        <Descriptions.Item label="操作时间">{item.commentTime}</Descriptions.Item>
+                                                        { action.value == '6' && <Descriptions.Item label="委派人">
+                                                            <ProField mode='read' text={item.userId} valueType="select" request={() => users}/>
+                                                        </Descriptions.Item> }
+                                                        { action.value == '7' && <Descriptions.Item label="转办人">
+                                                            <ProField mode='read' text={item.userId} valueType="select" request={() => users}/>
+                                                        </Descriptions.Item> }
+                                                        <Descriptions.Item span={3} label="意见">{commentContent}</Descriptions.Item>
+                                                        {filename && <Descriptions.Item span={3} label="附件">
+                                                            <a target={'_blank'} href={getAttachment(item.attachmentId)}>{filename}</a>
+                                                        </Descriptions.Item>}
+                                                    </>
+                                                })
+                                            }
+                                        </Descriptions>
+                                    </div>
                                 </ModalForm>}
                             </Space>
                         }
@@ -149,7 +233,7 @@ export default () => {
             request={loadTableData}
             search={false}
             scroll={{ y: 670 }}
-            columns={columns.concat(actionColumns)}
+            columns={columns(users).concat(actionColumns)}
             pagination={false}
             rowKey="processInstanceId"
             actionRef={table}/>
