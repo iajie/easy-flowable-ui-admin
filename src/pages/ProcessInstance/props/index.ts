@@ -68,7 +68,7 @@ export const columns = (users: any[]): ProColumns[] => [
         width: 120,
         render: (dom, { status }) => React.createElement(Tag,
             { color: status ? 'red' : 'success' },
-            status ? '终止' : '激活'
+            status ? '挂起' : '激活'
         )
     },
 ];

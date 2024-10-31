@@ -15,7 +15,7 @@ export const actionType = [
 ];
 
 export const actionOptions = [
-  { label: '审批', value: 'AGREE' },
+  { label: '同意', value: 'AGREE' },
   { label: '评论', value: 'ADD_COMMENT' },
   { label: '驳回', value: 'REJECT' },
   { label: '驳回到指定节点', value: 'REJECT_TO_TASK' },

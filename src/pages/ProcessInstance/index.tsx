@@ -7,7 +7,6 @@ import {
     ProColumns,
     ProTable,
     ModalForm,
-    ProFormText,
     DrawerForm,
     ProList,
     ProFormInstance,
@@ -21,8 +20,8 @@ import {
     ProFormItem
 } from "@ant-design/pro-components";
 import { columns, loadTableData, loadListData } from "./props";
-import { stateSet, businessStatus, getAttachment, addAttachment, delAttachment, executeTask } from "./props/service";
-import { Button, message, Space, Tag, List, Descriptions, Divider } from "antd";
+import { stateSet, getAttachment, addAttachment, delAttachment, executeTask } from "./props/service";
+import { Button, message, Space, Tag, Descriptions } from "antd";
 import { useModel } from "@umijs/max";
 import { actionOptions, actionType } from "@/utils/format";
 
@@ -31,7 +30,7 @@ export default () => {
     const { initialState } = useModel('@@initialState');
     const actionFormRef = useRef<ProFormInstance>();
     const listRef = useRef<ActionType>();
-    const { users } = initialState;
+    const { users, groups } = initialState;
     const { state }: any = useLocation();
     const table = React.useRef<ActionType>();
 
@@ -45,22 +44,8 @@ export default () => {
                     table.current?.reloadAndRest();
                 }
             } } style={{ color: entity.status ? '#87d068' : '#ff4d4f' }} type='text'>
-                {entity.status ? '激活' : '终止'}
+                {entity.status ? '激活' : '挂起'}
             </Button>
-            <ModalForm
-                width="30%"
-                request={() => ({ status: entity.businessKeyStatus })}
-                onFinish={async ({ status }) => {
-                    const { success } = await businessStatus(entity.processInstanceId, status);
-                    if (success) {
-                        message.success("业务状态修改成功");
-                        table.current?.reloadAndRest();
-                    }
-                    return success;
-                }}
-                trigger={<Button type='text' style={{ color: '#108ee9' }}>设置业务状态</Button>}>
-                <ProFormText label="业务状态" name="status" rules={[{ required: true, message: '业务状态不能为空' }]}/>
-            </ModalForm>
             <DrawerForm
                 title={entity.name}
                 drawerProps={{ destroyOnClose: true }}
@@ -145,21 +130,21 @@ export default () => {
                     params={{ processInstanceId: entity.processInstanceId }}
                     metas={{
                         avatar: {
-                            render: (dom, { duration }) => {
+                            render: (dom, { duration, assignee }) => {
                                 if (duration || duration === 0) {
                                     if (duration < 1000) {
                                         return <Tag color='success'>耗时：{duration}毫秒</Tag>
                                     } else if (duration >= 1000 && duration < 60 * 1000) {
                                         return <Tag color='success'>耗时：{duration/1000}秒</Tag>
                                     } else if (duration >= 60 * 1000 && duration < 60 * 60 * 1000) {
-                                        return <Tag color='success'>耗时：{duration/(60 * 1000)}分钟</Tag>
+                                        return <Tag color='success'>耗时：{(duration/(60 * 1000)).toFixed(0)}分钟</Tag>
                                     } else if (duration >= 60 * 60 * 1000 && duration < 24 * 60 * 60 * 1000) {
-                                        return <Tag color='success'>耗时：{duration/(60 * 60 * 1000)}小时</Tag>
+                                        return <Tag color='success'>耗时：{(duration/(60 * 60 * 1000)).toFixed(2)}小时</Tag>
                                     } else if (duration >= 24 * 60 * 60 * 1000) {
-                                        return <Tag color='success'>耗时：{duration/(24 * 60 * 60 * 1000)}天</Tag>
+                                        return <Tag color='success'>耗时：{(duration/(24 * 60 * 60 * 1000)).toFixed(2)}天</Tag>
                                     }
                                 }
-                                return <Tag color='orange'>待办</Tag>
+                                return <Tag color='orange'>{assignee ? '待办' : '任务待签收'}</Tag>
                             }
                         },
                         title: {
@@ -167,9 +152,17 @@ export default () => {
                         },
                         subTitle: {
                             dataIndex: 'assignee',
-                            valueType: 'select',
-                            request: () => users,
-                            render: (dom) => <Tag color="geekblue">执行人：{dom}</Tag>
+                            render: (dom, { assignee, candidateUsers, candidateGroups }) => {
+                                if (candidateGroups && candidateGroups.length) {
+                                    return <Tag color="purple">候选组:
+                                        <ProField text={candidateGroups} mode="read" request={() => groups}/>
+                                    </Tag>
+                                }
+                                return <Tag color="purple">
+                                    {assignee ? '执行人: ' : '候选人: '}
+                                    <ProField text={assignee ?? candidateUsers} mode="read" request={() => users}/>
+                                </Tag>
+                            }
                         },
                         content: {
                             render: (dom, entity) => <ProDescriptions column={3}>
@@ -180,7 +173,7 @@ export default () => {
                         },
                         actions: {
                             render: (dom, { comments, taskName }) => <Space>
-                                {(comments && comments.length)&&
+                                {(comments && comments.length) ?
                                 <ModalForm
                                     submitter={{ render: false }}
                                     title={`${taskName}-审批意见`}
@@ -217,7 +210,7 @@ export default () => {
                                             }
                                         </Descriptions>
                                     </div>
-                                </ModalForm>}
+                                </ModalForm> : null}
                             </Space>
                         }
                     }}
