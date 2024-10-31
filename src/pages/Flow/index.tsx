@@ -27,6 +27,7 @@ export default () => {
         {
             title: '操作',
             align: 'center',
+            search: false,
             render: (dom, entity) => <Space>
                 <Button onClick={ async () => {
                     const { success } = await deploymentState(entity.processDefinitionId);
@@ -106,6 +107,13 @@ export default () => {
                             key: 'processInstance',
                             onClick: () => {
                                 history.push('/processInstance', { processDefinitionId: entity.processDefinitionId, name: entity.name })
+                            }
+                        },
+                        {
+                            label: <Button type="link" style={{ color: '#d4b106' }}>🧭 已完成实例</Button>,
+                            key: 'processInstance',
+                            onClick: () => {
+                                history.push('/processHistory', { processDefinitionId: entity.processDefinitionId, name: entity.name })
                             }
                         },
                 ] }}>

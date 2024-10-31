@@ -29,6 +29,7 @@ export default defineConfig({
 		{ name: '流程部署历史', path: '/modelHistory', icon: '📚️', component: './History', },
 		{ name: '流程定义', icon: '🖼️️', path: '/flow', component: './Flow', },
 		{ name: '流程实例(运行)', icon: '🎐', path: '/processInstance', component: './ProcessInstance', },
+		{ name: '流程实例(已完成)', icon: '🧭', path: '/processHistory', component: './ProcessHistory', },
 		{ name: '登录', path: '/login', layout: false, component: './Login', },
 	],
 	npmClient: 'npm',
