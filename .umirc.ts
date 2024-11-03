@@ -10,6 +10,9 @@ export default defineConfig({
 	antd: {},
 	access: {},
 	model: {},
+	dva: {
+		skipModelValidate: false
+	},
 	initialState: {},
 	request: {},
 	layout: {

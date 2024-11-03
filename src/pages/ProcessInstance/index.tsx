@@ -120,7 +120,20 @@ export default () => {
                                 label="附件" max={1}
                                 action={addAttachment(entity.taskId, entity.processInstanceId)} />
                         </ModalForm>
-                        <Button type="primary" danger>流程作废</Button>
+                        <ModalForm
+                            width="25%"
+                            onFinish={async (values) => {
+                                const { success } = await executeTask({
+                                    ...values, flowCommentType: 'CANCELLATION',
+                                    processInstanceId: entity.processInstanceId,
+                                    taskId: entity.taskId
+                                });
+                                return success;
+                            }}
+                            trigger={<Button type="primary" danger>流程作废</Button>}>
+                            <ProFormTextArea name="commentContent" label="作废原因" rules={[{ required: true, message: '作废原因不能为空' }]}/>
+                        </ModalForm>
+
                     </Space>
                 }}
                 trigger={<Button type='text' style={{ color: 'purple' }}>执行历史</Button>}>
@@ -141,7 +154,7 @@ export default () => {
                                     } else if (duration >= 60 * 60 * 1000 && duration < 24 * 60 * 60 * 1000) {
                                         return <Tag color='success'>耗时：{(duration/(60 * 60 * 1000)).toFixed(2)}小时</Tag>
                                     } else if (duration >= 24 * 60 * 60 * 1000) {
-                                        return <Tag color='success'>耗时：{(duration/(24 * 60 * 60 * 1000)).toFixed(2)}天</Tag>
+                                        return <Tag color='warning'>耗时：{(duration/(24 * 60 * 60 * 1000)).toFixed(2)}天</Tag>
                                     }
                                 }
                                 return <Tag color='orange'>{assignee ? '待办' : '任务待签收'}</Tag>
@@ -225,7 +238,7 @@ export default () => {
             params={{ processDefinitionId: state?.processDefinitionId }}
             request={loadTableData}
             search={false}
-            scroll={{ y: 670 }}
+            scroll={{ y: 600 }}
             columns={columns(users).concat(actionColumns)}
             pagination={false}
             rowKey="processInstanceId"

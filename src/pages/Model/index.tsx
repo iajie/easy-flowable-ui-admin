@@ -75,7 +75,7 @@ export default () => {
                     search: false,
                     cardActionProps: 'actions',
                     render: (dom, record) => [
-                        <Popconfirm title="提示" description="是否部署该模型？部署后启动的流程将以最新版本为主！" onConfirm={async () => {
+                        <Popconfirm title="提示" key={'deployment_' + record.id} description="是否部署该模型？部署后启动的流程将以最新版本为主！" onConfirm={async () => {
                             const res = await deploymentModel(record.id);
                             if (res.success) {
                                 message.success('部署成功！');
@@ -84,18 +84,18 @@ export default () => {
                                 message.error(res.message);
                             }
                         }}>
-                            <Button type='link' key={'deployment_' + record.id} icon={<DeploymentUnitOutlined />}>部署</Button>
+                            <Button type='link'  icon={<DeploymentUnitOutlined />}>部署</Button>
                         </Popconfirm>,
                         <Button type='link' key={'history_' + record.id} onClick={() => {
                             const { id, name, modelEditorXml } = record;
                             history.push('/modelHistory', { modelId: id, title: name, xml: modelEditorXml });
                         }}>历史版本</Button>,
-                        <Popover content="可视化编辑器">
-                            <Button type='link' key={'edit_' + record.id} icon={<EditOutlined />} onClick={() => {
+                        <Popover key={'edit_' + record.id} content="可视化编辑器">
+                            <Button type='link'  icon={<EditOutlined />} onClick={() => {
                                 setState({ dataInfo: record, open: true, title: record.name })
                             }}>编辑</Button>
                         </Popover>,
-                        <Popconfirm title="提示" description="是否确认删除该模型？" onConfirm={async () => {
+                        <Popconfirm title="提示" key={'delete_' + record.id} description="是否确认删除该模型？" onConfirm={async () => {
                             const res = await deleteById(record.id);
                             if (res.success) {
                                 message.success('删除成功！');
@@ -104,7 +104,7 @@ export default () => {
                                 message.error(res.message);
                             }
                         }}>
-                            <Button type='link' danger key={'delete_' + record.id} icon={<DeleteOutlined />}>删除</Button>
+                            <Button type='link' danger  icon={<DeleteOutlined />}>删除</Button>
                         </Popconfirm>
                     ],
                 },

@@ -64,3 +64,12 @@ export const flowUserTaskList = async (flowKey: string) => {
 export const deploymentImage = (procInsId: string) => {
     return `/easy-flowable/deployment/deploymentImage/${procInsId}`;
 }
+
+/**
+ * 流程定义XML
+ * @param procInsId procInsId 流程定义id
+ * @returns
+ */
+export const deploymentXml = async (procInsId: string) => {
+    return request(`/easy-flowable/deployment/deploymentXml/${procInsId}`);
+}

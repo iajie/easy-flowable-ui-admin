@@ -49,10 +49,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
     return {
         logo,
         title: 'Easy-Flowable',
-        menu: {
-            locale: false,
-        },
-        // layout: 'mix',
+        layout: 'mix',
         footerRender: (props) => React.createElement('div', {
             style: {
                 lineHeight: "40px",

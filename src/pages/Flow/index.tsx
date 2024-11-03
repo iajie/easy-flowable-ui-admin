@@ -7,12 +7,19 @@ import {
 } from "@ant-design/pro-components";
 import { columns, loadTableData } from "./props";
 import { Button, Dropdown, Space, Image, Modal, Drawer, Tag, message } from "antd";
-import { deploymentImage, deploymentState, flowUserTaskList, startFlow } from "@/pages/Flow/props/service";
-import { useRef, useState } from "react";
+import {
+    deploymentImage,
+    deploymentState,
+    deploymentXml,
+    flowUserTaskList,
+    startFlow
+} from "@/pages/Flow/props/service";
+import React, { useRef, useState } from "react";
 import { DownOutlined } from "@ant-design/icons";
 import { useModel, history } from "@umijs/max";
+import { EasyFlowableViewer } from "easy-flowable-react";
 
-export default () => {
+const EasyFlowDeployment: React.FC = () => {
 
     const { initialState } = useModel('@@initialState');
     const { users, groups } = initialState;
@@ -32,7 +39,7 @@ export default () => {
                 <Button onClick={ async () => {
                     const { success } = await deploymentState(entity.processDefinitionId);
                     if (success) {
-                        table.current?.reloadAndRest();
+                        table.current?.reloadAndRest?.();
                     }
                 } }
                     style={{ color: entity.suspensionState == 2 ? '#bae637' : '#ff4d4f' }} type='link'>
@@ -79,10 +86,24 @@ export default () => {
                             key: 'start',
                         },
                         {
-                            label: <Button type="link" style={{ color: '#5b8c00' }}>🏞️ 部署图片</Button>,
-                            key: 'iamge',
+                            label: <Button type="link">⛺ 流程图预览</Button>,
+                            key: 'flow',
                             onClick: async () => {
-                                Modal.info({
+                                const { success, result } = await deploymentXml(entity.processDefinitionId);
+                                if (success) {
+                                    const model = Modal.info({
+                                        footer: false, width: '50%', centered: true,
+                                        closable: true, icon: null,
+                                        content: <EasyFlowableViewer data={result}/>
+                                    })
+                                }
+                            }
+                        },
+                        {
+                            label: <Button type="link" style={{ color: '#5b8c00' }}>🏞️ 部署图片</Button>,
+                            key: 'image',
+                            onClick: async () => {
+                                const model = Modal.info({
                                     footer: false, width: '50%', centered: true,
                                     closable: true, icon: null,
                                     content: <Image preview={false} src={deploymentImage(entity.processDefinitionId)}/>
@@ -111,7 +132,7 @@ export default () => {
                         },
                         {
                             label: <Button type="link" style={{ color: '#d4b106' }}>🧭 已完成实例</Button>,
-                            key: 'processInstance',
+                            key: 'processHistory',
                             onClick: () => {
                                 history.push('/processHistory', { processDefinitionId: entity.processDefinitionId, name: entity.name })
                             }
@@ -128,7 +149,7 @@ export default () => {
             actionRef={table}
             request={loadTableData}
             scroll={{ y: 670 }}
-            rowKey="processDefinitionId"
+            rowKey="id"
             columns={ columns.concat(actionColumn) }/>
         <Drawer open={userTask.open} onClose={() => setUserTask({ ...userTask, open: false })} title="用户任务列表">
             <ProList
@@ -174,3 +195,5 @@ export default () => {
         </Drawer>
     </PageContainer>
 }
+
+export default EasyFlowDeployment;
